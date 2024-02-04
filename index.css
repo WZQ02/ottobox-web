@@ -1,0 +1,241 @@
+:root {
+    --cube_btn_size: 64px;
+    --cube_margin: 4px;
+    --cube_size: calc(var(--cube_btn_size) + var(--cube_margin)*2);
+    --container_size: calc(var(--cube_size)*4);
+    --tb_font_size: var(--cube_btn_size);
+}
+* {
+    font-family: "HarmonyOS Sans SC","Century Gothic","Noto Sans","Source Han Sans CN","Microsoft YaHei",微软雅黑,"Microsoft JhengHei","Segoe UI","Arial","黑体";
+}
+body {
+    background-color: #fff;
+    transition: background-color .4s;
+    overflow: hidden;
+}
+#launchpad_container {
+    position: absolute;
+    width: var(--container_size);
+    height: var(--container_size);
+    top: calc(50% - var(--container_size)*.5);
+    left: calc(50% - var(--container_size)*.5);
+    font-size: 0;
+    animation: initialize_anim 0.4s cubic-bezier(0, 0.4, 0, 1) 1;
+}
+button {
+    border: none;
+    padding: 0px;
+}
+.launchpad_btn {
+    display: inline;
+    position: relative;
+    width: var(--cube_btn_size);
+    height: var(--cube_btn_size);
+    margin: var(--cube_margin);
+    border-radius: 8px;
+    background-color: #777;
+    color: #fff;
+    box-shadow: 0 0 calc(var(--cube_margin)*4) #0004;
+    font-size: calc(var(--cube_btn_size)*.3);
+    transition-property: background-color,scale;
+    transition-duration: .15s;
+    user-select: none;
+    opacity: 1;
+}
+.launchpad_btn .btn_kbd_title {
+    position: absolute;
+    font-size: calc(var(--cube_btn_size)*.2);
+    top: 0px;
+    left: calc(var(--cube_btn_size)*.04);
+    opacity: .5;
+    display: none;
+}
+.launchpad_btn:active {
+    background-color: #fff !important;
+    color: #000 !important;
+    scale: 0.85;
+}
+#fileinput {
+    display: none;
+}
+label:not(.btn_label) {
+    position: relative;
+    display: table;
+    font-size: calc(var(--tb_font_size)*.25);
+    left: calc(50% - var(--tb_font_size)*1.625);
+}
+input#set_mode,input#always_show_keys {
+    position: relative;
+    left: calc(50% - var(--tb_font_size)*2.2);
+    top: calc(var(--tb_font_size)*.375);
+    width: calc(var(--tb_font_size)*.35);
+    height: calc(var(--tb_font_size)*.35);
+}
+.btn_label {
+    position: relative;
+    display: table;
+    width: calc(var(--tb_font_size)*2);
+    height: calc(var(--tb_font_size)*.5);
+    left: calc(50% - var(--tb_font_size)*1);
+    border-radius: calc(var(--tb_font_size)*.75/8);
+    background-color: #fff;
+    box-shadow: 0 0 calc(var(--cube_margin)*2) #0004;
+    transition-property: background-color,filter,scale;
+    transition-duration: .15s;
+    text-align: center;
+    top: calc(var(--tb_font_size)*.175);
+    margin: calc(var(--tb_font_size)*.175) 0;
+    z-index: 1;
+}
+.btn_label span {
+    position: relative;
+    text-align: center;
+    font-size: calc(var(--tb_font_size)*.25);
+    color: #222;
+}
+label.btn_label span {
+    top: calc(var(--tb_font_size)*.075);
+}
+.btn_label:active,#music_controls button:active {
+    filter: invert(1);
+    scale: 0.9;
+}
+#top_bar {
+    position: absolute;
+    width: 100vw;
+    height: calc(var(--tb_font_size)*4.625);
+    left: 0px;
+    top: calc(var(--tb_font_size)*-4);
+    background-color: #fff;
+    box-shadow: 0 0 calc(var(--cube_margin)*4) #0007;
+    transition-property: top,height,opacity;
+    transition-duration: .25s;
+    opacity: .5;
+    z-index: 2;
+    animation: initialize_top 0.4s cubic-bezier(0, 0.4, 0, 1) 1;
+}
+#top_bar.show {
+    top: 0px !important;
+    opacity: 1;
+}
+#top_bar.show_snd_controls {
+    top: calc(var(--tb_font_size)*-5.375);
+    height: calc(var(--tb_font_size)*6);
+}
+#chevron svg {
+    position: absolute;
+    left: calc(50vw - var(--tb_font_size)*.375);
+    bottom: calc(var(--tb_font_size)*-.1);
+    width: calc(var(--tb_font_size)*.75);
+    opacity: .6;
+    transition: opacity .25s;
+}
+#chevron svg:active {
+    opacity: 1 !important;
+}
+#music_controls {
+    display: none;
+    position: absolute;
+    bottom: calc(var(--tb_font_size)*.85);
+    width: calc(var(--tb_font_size)*4);
+    height: var(--tb_font_size);
+    left: calc(50vw - var(--tb_font_size)*2);
+}
+#music_controls span {
+    display: inline;
+    font-weight: bold;
+    width: 100%;
+    text-align: left;
+    position: absolute;
+    font-size: calc(var(--tb_font_size)*.25);
+    opacity: .8;
+    user-select: none;
+}
+#music_controls button {
+    position: relative;
+    width: calc(var(--tb_font_size)*1);
+    height: calc(var(--tb_font_size)*.6);
+    left: calc(50% - var(--tb_font_size)*1 - var(--cube_margin)*2.5);
+    top: calc(var(--tb_font_size)*.55);
+    border-radius: calc(var(--tb_font_size)*.125);
+    background-color: #fff;
+    margin: var(--cube_margin);
+    box-shadow: 0 0 calc(var(--cube_margin)*2) #0004;
+    transition-property: background-color,filter,scale;
+    transition-duration: .15s;
+}
+#music_controls button svg{
+    position: absolute;
+    width: calc(var(--tb_font_size)*.5);
+    top: calc(50% - var(--tb_font_size)*.25);
+    left: calc(50% - var(--tb_font_size)*.25);
+    opacity: .8;
+}
+@keyframes initialize_anim {
+    from {
+        opacity: 0;
+        scale: .85;
+    } to {
+        opacity: 1;
+        scale: 1;
+    }
+}
+@keyframes initialize_top {
+    from {
+        opacity: 0;
+        transform: translateY(calc(var(--tb_font_size)*-.75));
+    } to {
+        opacity: .5;
+        transform: translateY(0px);
+    }
+}
+@media screen and (min-width: 320px) and (max-width: 800px) {
+    :root {
+        --cube_btn_size: calc(15vw + 16px);
+        --cube_margin: calc(var(--cube_btn_size)/16);
+        --tb_font_size: calc(var(--cube_btn_size)*.5 + 32px);
+    }
+}
+@media screen and (min-width: 800px) {
+    :root {
+        --cube_btn_size: 136px;
+        --cube_margin: calc(var(--cube_btn_size)/16);
+        --tb_font_size: 100px;
+    }
+}
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #111;
+    }
+    .launchpad_btn {
+        background-color: #333;
+    }
+    #top_bar {
+        background-color: #252525;
+    }
+    .btn_label,#music_controls button {
+        background-color: #111;
+    }
+    .btn_label span,label span,#playing_value {
+        color: #fff;
+    }
+    svg {
+        filter: invert(1);
+    }
+}
+@media (any-hover: hover) {
+    .launchpad_btn:hover {
+        background-color: #111;
+    }
+    .btn_label:hover,#music_controls button:hover {
+        background-color: #ccc;
+    }
+    #chevron svg:hover {
+        opacity: .2;
+    }
+}
+@media (prefers-color-scheme: dark) and (any-hover: hover) {
+    .btn_label:hover,#music_controls button:hover {
+        background-color: #555;
+    }
+}

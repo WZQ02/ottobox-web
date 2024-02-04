@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--如果你看到了这行字：这玩意是我一时兴起乱做的，如果需要修改代码并自己部署的话，请随意。-->
+    <meta charset="utf-8">
+    <title>OTTO Launchpad</title>
+    <meta name="viewport" content="user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--<link rel="icon" type="image/png" href="https://wzq02.cf/images/icon.png" />-->
+    <link rel="icon" type="image/x-icon" href="https://wzq02.cf/ottohzys/static/lizi.ico">
+    <link rel="shortcut icon" type="image/png" href="https://wzq02.cf/images/icon.png" />
+    <link rel="stylesheet" href="index.css" id="skin">
+</head>
+<body>
+    <div id="launchpad_container"></div>
+    <div id="top_bar">
+        <button id="backtohome" class="btn_label" onclick="tosite('https\:\/\/wzq02.cf/#/demos')"><span>返回主页</span></button>
+        <input id="set_mode" type="checkbox" onclick="toggle_mode()"><label for="set_mode"><span>重复点击时，停止上次点击的音效</span></label>
+        <input id="always_show_keys" type="checkbox" onclick="toggle_always_show_keys()"><label for="always_show_keys"><span>始终显示键位</span></label>
+        <button id="randomize" class="btn_label" onclick="randomizemapping()"><span>打乱顺序</span></button>
+        <label for="fileinput" id="file_label" class="btn_label"><span id="f_label_span">加载音乐文件</span><input type="file" id="fileinput"></label>
+        <span id="chevron" onclick="toggle_top_bar()">
+            <svg viewBox="0 0 24 24" id="chevron_down">
+                <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+            </svg>
+            <svg viewBox="0 0 24 24" id="chevron_up" style="display: none;">
+                <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" />
+            </svg>
+        </span>
+        <div id="music_controls">
+            <span id="playing">🎵&nbsp;<span id="playing_value"></span></span>
+            <button id="play" onclick="toggle_play_music()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+                </svg>
+            </button>
+            <button id="stop" onclick="toggle_play_music(1)">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18,18H6V6H18V18Z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</body>
+<script>
+    const app_version = '0.0.3'
+    const last_updated = '2024/1/23'
+    let audio_dir = 'static/mp3/', audio_fmt = '.mp3', audio_type = 'audio/mpeg';
+    let samples_ori = ['ah1','ah2','allin','ao','cock1','cock2','cock3','haohan','wow','push','haa','xia','hehe','bdj','bin','chong','feng','ah3','hamood','ji','bai','daoli','xuangou','yuan','dan','chongci','b']
+    let sample_disp_nam_ori = ['啊1','啊2','All in','奥↑','凤鸣1','凤鸣2','凤鸣3','好汉','哇袄','push','哈↑','下↓','呵呵','b动静','冰！','冲！','风！','啊3','哈姆','鸡','掰！','道理~','炫狗','原！','弹！','冲刺','b']
+    let kbd_map = [53,54,55,56,82,84,89,85,70,71,72,74,67,86,66,78]
+    let kbd_disp_nam = ['5','6','7','8','R','T','Y','U','F','G','H','J','C','V','B','N']
+    let mode = 0, row_count = 4, cube_count = 4, snd_created_count = 0, kbd_show = 0, topbar_show = 0, always_show_keys = 0;
+    let samples = [], sample_disp_nam = []
+    let sound_last_ms = 1500;//声音最多持续时间（毫秒）
+    read_storage();
+    load_samples();
+    generate_cube();
+    function read_storage() {
+        mode = localStorage.getItem('ottolp_mode');
+        always_show_keys = localStorage.getItem('ottolp_always_show_keys');
+        document.querySelector('#set_mode').checked = mode;
+        document.querySelector('#always_show_keys').checked = always_show_keys;
+    }
+    function generate_cube() {
+        for (let i=0; i<row_count; i++) {//每行
+            let row = document.createElement("div")
+            row.id = "row_"+(i+1);
+            for (let j=0; j<cube_count; j++) {//每个button
+                let btn = document.createElement("button")
+                btn.className = "launchpad_btn"
+                btn.id = "btn_"+[i*4+j]
+                //btn.setAttribute('onmousedown',`create_sound("${samples[i*4+j]}")`);
+                let audio = document.createElement("audio")
+                audio.type = audio_type;
+                audio.src = audio_dir+samples[i*4+j]+audio_fmt;
+                audio.className = 'audio_forload';
+                audio.id = 'aud_pre_'+samples[i*4+j]
+                audio.preload = "auto";
+                audio.autoplay = 0;//这里的audio创建出来只是为了加载，不自动播放
+                document.body.appendChild(audio)
+                let span = document.createElement("span")
+                span.className = "btn_title"
+                span.innerText = sample_disp_nam[i*4+j]
+                let span2 = document.createElement("span")
+                span2.className = "btn_kbd_title"
+                span2.innerText = kbd_disp_nam[i*4+j]
+                span2.id = "kbd_title_"+kbd_map[i*4+j]
+                row.appendChild(btn)
+                btn.appendChild(span)
+                btn.appendChild(span2)
+            }
+            document.querySelector('#launchpad_container').appendChild(row);
+        }
+        if (always_show_keys) {
+            show_kbd_keys();
+        }
+        add_listeners();
+    }
+    function create_sound(name) {
+        if (mode) {
+            let audio = document.querySelector("#aud_pre_"+name)
+            audio.currentTime = 0;
+            audio.play();
+        } else {
+            let audio = document.createElement("audio")
+            let id = snd_created_count
+            audio.type = audio_type;
+            audio.src = audio_dir+name+audio_fmt;
+            audio.autoplay = 1;
+            audio.className = 'audio_play';
+            snd_created_count++;
+            audio.id = 'aud_'+id;
+            document.body.appendChild(audio)
+            setTimeout(()=>{document.body.removeChild(document.querySelector("#aud_"+id))},sound_last_ms)
+        }
+    }
+    document.querySelector('#fileinput').addEventListener('change', function(e) {
+        if (e.target.files[0]) {} else {
+            return;
+        }
+        let file = window.URL.createObjectURL(e.target.files[0]);
+        if (document.querySelector('.imported_audio')) {
+            document.body.removeChild(document.querySelector('.imported_audio'));
+        }
+        let audio = document.createElement("audio");
+        audio.autoplay = 1;
+        audio.controls = 0;
+        audio.className = 'imported_audio';
+        audio.src = file;
+        audio.loop = 1;
+        document.body.appendChild(audio);
+        document.querySelector('#music_controls').style.display = 'block';
+        document.querySelector('#top_bar').classList.add('show_snd_controls');
+        document.querySelector('#playing_value').innerText = e.target.files[0].name
+    })
+    document.onkeydown = (e) => {
+        show_kbd_keys();
+        if (kbd_map.indexOf(e.keyCode) != -1) {
+            create_sound(samples[kbd_map.indexOf(e.keyCode)])
+            let btn = document.querySelector('#btn_'+kbd_map.indexOf(e.keyCode))
+            btn.style = "background-color: #fff !important;color: #000 !important;scale: 0.85;"
+            setTimeout(()=>{btn.style = ''},100)
+        }
+        if (e.keyCode == 32) {randomizemapping()}
+    }
+    function show_kbd_keys() {
+        if (!kbd_show) {
+            for (let i=0;i<kbd_map.length;i++) {
+                document.querySelector('#kbd_title_'+kbd_map[i]).style = 'display: block;'
+            }
+            kbd_show = 1;
+        }
+    }
+    /*window.onresize = () => {
+        if (window.innerHeight < 900 && (window.innerHeight/window.innerWidth < 1.125)) {
+            console.log("tet")
+            document.documentElement.style.setProperty('--cube_btn_size', (window.innerHeight*15+16)+'px !important');
+        }
+    }*/
+    function randomizemapping() {
+        clear_cubes();
+        let map = []
+        for (let i=0;i<samples_ori.length;i++) {
+            map[i] = i
+        }
+        map.sort(()=>{return Math.random() - 0.5;})
+        map.splice(row_count*cube_count,samples_ori.length-1)
+        let samples_new = []
+        let sample_disp_nam_new = []
+        for (let i=0;i<row_count*cube_count;i++) {
+            samples_new[i] = samples_ori[map[i]]
+            sample_disp_nam_new[i] = sample_disp_nam_ori[map[i]]
+        }
+        samples = samples_new
+        sample_disp_nam = sample_disp_nam_new
+        generate_cube();
+    }
+    function clear_cubes() {
+        for (let i=0; i<row_count; i++) {
+            document.querySelector('#launchpad_container').removeChild(document.querySelector('#row_'+(i+1)))
+        }
+        for (let i=0; i<samples.length; i++) {
+            document.body.removeChild(document.querySelector('#aud_pre_'+samples[i]))
+        }
+        kbd_show = 0;
+    }
+    function toggle_top_bar() {
+        if (topbar_show) {
+            topbar_show = 0;
+            document.querySelector('#top_bar').classList.remove('show');
+            document.querySelector('#chevron_down').style = '';
+            document.querySelector('#chevron_up').style = 'display: none;'
+        } else {
+            topbar_show = 1;
+            document.querySelector('#top_bar').classList.add('show');
+            document.querySelector('#chevron_up').style = '';
+            document.querySelector('#chevron_down').style = 'display: none;'
+        }
+    }
+    function toggle_mode() {
+        if (mode) {
+            mode = 0;
+        } else {
+            mode = 1;
+        }
+        localStorage.setItem('ottolp_mode',mode==true?"true":'');
+    }
+    function tosite(tosite) {
+        window.location.href = tosite;
+    }
+    function toggle_always_show_keys() {
+        always_show_keys = document.querySelector('#always_show_keys').checked;
+        show_kbd_keys();
+        localStorage.setItem('ottolp_always_show_keys',always_show_keys==true?"true":'');
+    }
+    function toggle_play_music(stop) {
+        let audio = document.querySelector('.imported_audio');
+        let playbtn = document.querySelector('#play');
+        if (stop) {
+            audio.currentTime = 0;
+            audio.pause();
+            playbtn.innerHTML = "<svg viewBox='0 0 24 24'><path d='M8,5.14V19.14L19,12.14L8,5.14Z' /></svg>"
+        } else {
+            if (audio.paused) {
+                audio.play();
+                playbtn.innerHTML = "<svg viewBox='0 0 24 24'><path d='M14,19H18V5H14M6,19H10V5H6V19Z' /></svg>"
+            } else {
+                audio.pause();
+                playbtn.innerHTML = "<svg viewBox='0 0 24 24'><path d='M8,5.14V19.14L19,12.14L8,5.14Z' /></svg>"
+            }
+        }
+    }
+    function add_listeners() {
+        for (let i=0; i<samples.length; i++) {
+            let btn = document.querySelector('#btn_'+i);
+            if (btn.ontouchstart === null) {
+                btn.ontouchstart = function(){create_sound(samples[i])}
+            } else {
+                btn.onmousedown = function(){create_sound(samples[i])}
+            }
+        }
+    }
+    function load_samples() {
+        for (let i=0; i<row_count*cube_count; i++) {
+            samples[i] = samples_ori[i]
+            sample_disp_nam[i] = sample_disp_nam_ori[i]
+        }
+    }
+
+    console.log('OTTO Launchpad version '+app_version+', Last updated '+last_updated)
+</script>
+</html>
