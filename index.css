@@ -22,6 +22,10 @@ body {
     font-size: 0;
     animation: initialize_anim 0.4s cubic-bezier(0, 0.4, 0, 1) 1;
 }
+#launchpad_container._55m {
+    scale: .86;
+    animation: initialize_anim_55m 0.4s cubic-bezier(0, 0.4, 0, 1) 1;
+}
 button {
     border: none;
     padding: 0px;
@@ -64,7 +68,7 @@ label:not(.btn_label) {
     font-size: calc(var(--tb_font_size)*.25);
     left: calc(50% - var(--tb_font_size)*1.625);
 }
-input#set_mode,input#always_show_keys {
+.app_ckbox {
     position: relative;
     left: calc(50% - var(--tb_font_size)*2.2);
     top: calc(var(--tb_font_size)*.375);
@@ -103,9 +107,9 @@ label.btn_label span {
 #top_bar {
     position: absolute;
     width: 100vw;
-    height: calc(var(--tb_font_size)*4.625);
+    height: calc(var(--tb_font_size)*5.35);
     left: 0px;
-    top: calc(var(--tb_font_size)*-4);
+    top: calc(var(--tb_font_size)*-4.75);
     background-color: #fff;
     box-shadow: 0 0 calc(var(--cube_margin)*4) #0007;
     transition-property: top,height,opacity;
@@ -119,8 +123,8 @@ label.btn_label span {
     opacity: 1;
 }
 #top_bar.show_snd_controls {
-    top: calc(var(--tb_font_size)*-5.375);
-    height: calc(var(--tb_font_size)*6);
+    top: calc(var(--tb_font_size)*-6.25);
+    height: calc(var(--tb_font_size)*6.85);
 }
 #chevron svg {
     position: absolute;
@@ -180,6 +184,15 @@ label.btn_label span {
         scale: 1;
     }
 }
+@keyframes initialize_anim_55m {
+    from {
+        opacity: 0;
+        scale: .72;
+    } to {
+        opacity: 1;
+        scale: .86;
+    }
+}
 @keyframes initialize_top {
     from {
         opacity: 0;
@@ -193,14 +206,14 @@ label.btn_label span {
     :root {
         --cube_btn_size: calc(15vw + 16px);
         --cube_margin: calc(var(--cube_btn_size)/16);
-        --tb_font_size: calc(var(--cube_btn_size)*.5 + 32px);
+        --tb_font_size: calc(var(--cube_btn_size)*.25 + 48px);
     }
 }
 @media screen and (min-width: 800px) {
     :root {
         --cube_btn_size: 136px;
         --cube_margin: calc(var(--cube_btn_size)/16);
-        --tb_font_size: 100px;
+        --tb_font_size: 82px;
     }
 }
 @media (prefers-color-scheme: dark) {

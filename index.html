@@ -3,7 +3,7 @@
 <head>
     <!--如果你看到了这行字：这玩意是我一时兴起乱做的，如果需要修改代码并自己部署的话，请随意。-->
     <meta charset="utf-8">
-    <title>OTTO Launchpad</title>
+    <title>电棍盒网页版</title>
     <meta name="viewport" content="user-scalable=no">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!--<link rel="icon" type="image/png" href="https://wzq02.cf/images/icon.png" />-->
@@ -15,8 +15,9 @@
     <div id="launchpad_container"></div>
     <div id="top_bar">
         <button id="backtohome" class="btn_label" onclick="tosite('https\:\/\/wzq02.cf/#/demos')"><span>返回主页</span></button>
-        <input id="set_mode" type="checkbox" onclick="toggle_mode()"><label for="set_mode"><span>重复点击时，停止上次点击的音效</span></label>
-        <input id="always_show_keys" type="checkbox" onclick="toggle_always_show_keys()"><label for="always_show_keys"><span>始终显示键位</span></label>
+        <input id="set_mode" class="app_ckbox" type="checkbox" onclick="toggle_mode()"><label for="set_mode"><span>重复点击时，停止上次点击的音效</span></label>
+        <input id="always_show_keys" class="app_ckbox" type="checkbox" onclick="toggle_always_show_keys()"><label for="always_show_keys"><span>始终显示键位</span></label>
+        <input id="toggle55" class="app_ckbox" type="checkbox" onclick="toggle5x5()"><label for="toggle55"><span>5x5 矩阵</span></label>
         <button id="randomize" class="btn_label" onclick="randomizemapping()"><span>打乱顺序</span></button>
         <label for="fileinput" id="file_label" class="btn_label"><span id="f_label_span">加载音乐文件</span><input type="file" id="fileinput"></label>
         <span id="chevron" onclick="toggle_top_bar()">
@@ -43,24 +44,29 @@
     </div>
 </body>
 <script>
-    const app_version = '0.0.3'
-    const last_updated = '2024/1/23'
+    const app_version = '0.0.4'
+    const last_updated = '2024/2/4'
     let audio_dir = 'static/mp3/', audio_fmt = '.mp3', audio_type = 'audio/mpeg';
     let samples_ori = ['ah1','ah2','allin','ao','cock1','cock2','cock3','haohan','wow','push','haa','xia','hehe','bdj','bin','chong','feng','ah3','hamood','ji','bai','daoli','xuangou','yuan','dan','chongci','b']
     let sample_disp_nam_ori = ['啊1','啊2','All in','奥↑','凤鸣1','凤鸣2','凤鸣3','好汉','哇袄','push','哈↑','下↓','呵呵','b动静','冰！','冲！','风！','啊3','哈姆','鸡','掰！','道理~','炫狗','原！','弹！','冲刺','b']
-    let kbd_map = [53,54,55,56,82,84,89,85,70,71,72,74,67,86,66,78]
-    let kbd_disp_nam = ['5','6','7','8','R','T','Y','U','F','G','H','J','C','V','B','N']
-    let mode = 0, row_count = 4, cube_count = 4, snd_created_count = 0, kbd_show = 0, topbar_show = 0, always_show_keys = 0;
-    let samples = [], sample_disp_nam = []
+    let kbd_map_ori = [53,54,55,56,82,84,89,85,70,71,72,74,67,86,66,78]
+    let kbd_disp_nam_ori = ['5','6','7','8','R','T','Y','U','F','G','H','J','C','V','B','N']
+    let ext_kbd_map = [57,73,75,77]
+    let ext_kbd_disp_nam = ['9','I','K','M']
+    let mode = 0, row_count = cube_count = 4, snd_created_count = kbd_show = topbar_show = always_show_keys = _55m_flag = 0;
     let sound_last_ms = 1500;//声音最多持续时间（毫秒）
     read_storage();
+    _55m_check();
     load_samples();
+    load_kbd_map();
     generate_cube();
     function read_storage() {
         mode = localStorage.getItem('ottolp_mode');
         always_show_keys = localStorage.getItem('ottolp_always_show_keys');
+        _55m_flag = localStorage.getItem('ottolp_55');
         document.querySelector('#set_mode').checked = mode;
         document.querySelector('#always_show_keys').checked = always_show_keys;
+        document.querySelector('#toggle55').checked = _55m_flag;
     }
     function generate_cube() {
         for (let i=0; i<row_count; i++) {//每行
@@ -69,23 +75,23 @@
             for (let j=0; j<cube_count; j++) {//每个button
                 let btn = document.createElement("button")
                 btn.className = "launchpad_btn"
-                btn.id = "btn_"+[i*4+j]
-                //btn.setAttribute('onmousedown',`create_sound("${samples[i*4+j]}")`);
+                btn.id = "btn_"+[i*row_count+j]
+                //btn.setAttribute('onmousedown',`create_sound("${samples[i*row_count+j]}")`);
                 let audio = document.createElement("audio")
                 audio.type = audio_type;
-                audio.src = audio_dir+samples[i*4+j]+audio_fmt;
+                audio.src = audio_dir+samples[i*row_count+j]+audio_fmt;
                 audio.className = 'audio_forload';
-                audio.id = 'aud_pre_'+samples[i*4+j]
+                audio.id = 'aud_pre_'+samples[i*row_count+j]
                 audio.preload = "auto";
                 audio.autoplay = 0;//这里的audio创建出来只是为了加载，不自动播放
                 document.body.appendChild(audio)
                 let span = document.createElement("span")
                 span.className = "btn_title"
-                span.innerText = sample_disp_nam[i*4+j]
+                span.innerText = sample_disp_nam[i*row_count+j]
                 let span2 = document.createElement("span")
                 span2.className = "btn_kbd_title"
-                span2.innerText = kbd_disp_nam[i*4+j]
-                span2.id = "kbd_title_"+kbd_map[i*4+j]
+                span2.innerText = kbd_disp_nam[i*row_count+j]
+                span2.id = "kbd_title_"+kbd_map[i*row_count+j]
                 row.appendChild(btn)
                 btn.appendChild(span)
                 btn.appendChild(span2)
@@ -152,12 +158,6 @@
             kbd_show = 1;
         }
     }
-    /*window.onresize = () => {
-        if (window.innerHeight < 900 && (window.innerHeight/window.innerWidth < 1.125)) {
-            console.log("tet")
-            document.documentElement.style.setProperty('--cube_btn_size', (window.innerHeight*15+16)+'px !important');
-        }
-    }*/
     function randomizemapping() {
         clear_cubes();
         let map = []
@@ -242,9 +242,53 @@
         }
     }
     function load_samples() {
+        samples = [], sample_disp_nam = []
         for (let i=0; i<row_count*cube_count; i++) {
             samples[i] = samples_ori[i]
             sample_disp_nam[i] = sample_disp_nam_ori[i]
+        }
+    }
+    function load_kbd_map() {
+        kbd_map = [], kbd_disp_nam = []
+        if (_55m_flag) {
+            for (let i=0; i<4; i++) {
+                for (let j=0; j<5; j++) {
+                    if (j!=4) {
+                        kbd_map[i*5+j] = kbd_map_ori[i*4+j]
+                        kbd_disp_nam[i*5+j] = kbd_disp_nam_ori[i*4+j]
+                    } else {
+                        kbd_map[i*5+4] = ext_kbd_map[i]
+                        kbd_disp_nam[i*5+4] = ext_kbd_disp_nam[i]
+                    }
+                }
+            }
+        } else {
+            kbd_map = kbd_map_ori
+            kbd_disp_nam = kbd_disp_nam_ori
+        }
+    }
+    function toggle5x5() {
+        clear_cubes();
+        if (_55m_flag) {
+            _55m_flag = 0;
+        } else {
+            _55m_flag = 1;
+        }
+        localStorage.setItem('ottolp_55',_55m_flag==true?"true":'')
+        _55m_check();
+        load_kbd_map();
+        load_samples();
+        generate_cube();
+    }
+    function _55m_check() {
+        if (_55m_flag) {
+            row_count = cube_count = 5;
+            document.documentElement.style.setProperty('--container_size', 'calc(var(--cube_size)*5)');
+            document.getElementById('launchpad_container').classList.add('_55m');
+        } else {
+            row_count = cube_count = 4;
+            document.documentElement.style.setProperty('--container_size', 'calc(var(--cube_size)*4)');
+            document.getElementById('launchpad_container').classList.remove('_55m');
         }
     }
 
