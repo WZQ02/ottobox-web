@@ -44,15 +44,17 @@
     </div>
 </body>
 <script>
-    const app_version = '0.0.4'
-    const last_updated = '2024/2/4'
-    let audio_dir = 'static/mp3/', audio_fmt = '.mp3', audio_type = 'audio/mpeg';
-    let samples_ori = ['ah1','ah2','allin','ao','cock1','cock2','cock3','haohan','wow','push','haa','xia','hehe','bdj','bin','chong','feng','ah3','hamood','ji','bai','daoli','xuangou','yuan','dan','chongci','b']
-    let sample_disp_nam_ori = ['啊1','啊2','All in','奥↑','凤鸣1','凤鸣2','凤鸣3','好汉','哇袄','push','哈↑','下↓','呵呵','b动静','冰！','冲！','风！','啊3','哈姆','鸡','掰！','道理~','炫狗','原！','弹！','冲刺','b']
-    let kbd_map_ori = [53,54,55,56,82,84,89,85,70,71,72,74,67,86,66,78]
-    let kbd_disp_nam_ori = ['5','6','7','8','R','T','Y','U','F','G','H','J','C','V','B','N']
-    let ext_kbd_map = [57,73,75,77]
-    let ext_kbd_disp_nam = ['9','I','K','M']
+    const app_version = '0.0.6', last_updated = '2024/2/5';
+    const audio_dir = 'static/mp3/', audio_fmt = '.mp3', audio_type = 'audio/mpeg';
+    const samples_ori = ['ah1','ah2','allin','ao','cock1','cock2','cock3','haohan','wow','push','haa','xia','hehe','bdj','bin','chong','feng','ah3','hamood','ji','bai','daoli','xuangou','yuan','dan','chongci','b','ba']
+    const sample_disp_nam_ori = ['啊1','啊2','All in','奥↑','凤鸣1','凤鸣2','凤鸣3','好汉','哇袄','push','哈↑','下↓','呵呵','b动静','冰！','冲！','风！','啊3','哈姆','鸡','掰！','道理~','炫狗','原！','弹！','冲刺','b','爸↓']
+    //const kbd_map_ori = [53,54,55,56,82,84,89,85,70,71,72,74,67,86,66,78]
+    //const kbd_disp_nam_ori = ['5','6','7','8','R','T','Y','U','F','G','H','J','C','V','B','N']
+    const kbd_map_ori = [50,51,57,48,81,87,79,80,65,83,75,76,90,88,188,190]
+    const kbd_disp_nam_ori = ['2','3','9','0','Q','W','O','P','A','S','K','L','Z','X','<','>']
+    //const ext_kbd_map = [57,73,75,77]
+    const ext_kbd_map = [189,219,186,191,67,86,66,78,77]
+    const ext_kbd_disp_nam = ['-','{',';','?','C','V','B','N','M']
     let mode = 0, row_count = cube_count = 4, snd_created_count = kbd_show = topbar_show = always_show_keys = _55m_flag = 0;
     let sound_last_ms = 1500;//声音最多持续时间（毫秒）
     read_storage();
@@ -261,6 +263,10 @@
                         kbd_disp_nam[i*5+4] = ext_kbd_disp_nam[i]
                     }
                 }
+            }
+            for (let i=0; i<5; i++) {
+                kbd_map[20+i] = ext_kbd_map[4+i]
+                kbd_disp_nam[20+i] = ext_kbd_disp_nam[4+i]
             }
         } else {
             kbd_map = kbd_map_ori
