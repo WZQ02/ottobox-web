@@ -38,6 +38,7 @@ button {
     margin: var(--cube_margin);
     border-radius: 8px;
     background-color: #777;
+    background-size: contain;
     color: #fff;
     box-shadow: 0 0 calc(var(--cube_margin)*4) #0004;
     font-size: calc(var(--cube_btn_size)*.3);
@@ -54,10 +55,11 @@ button {
     opacity: .5;
     display: none;
 }
-.launchpad_btn:active {
+.launchpad_btn:active,.launchpad_btn.pressed {
     background-color: #fff !important;
     color: #000 !important;
     scale: 0.85;
+    background-image: url('static/webp/lizi_square.webp');
 }
 #fileinput {
     display: none;
